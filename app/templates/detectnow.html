@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+    <div class="container-fluid">
+        <h3>Bootstrap Registration Form</h3>
+        <form>
+
+
+            <div class="form-group">
+                <label for="uname"> username: </label>
+                <input type="text" class="form-control" id="uname">
+            </div>
+            <div class="form-group">
+                <label for="paswrd"> User Password: </label>
+                <input type="password" class="form-control" id="paswrd">
+            </div>
+            <button type="submit" class="btn btn-primary"> Submit</button>
+
+            <div class="form-group">
+                User Name:
+                <input type="text" class="form-control" placeholder="Enter the username">
+            </div>
+            <div class="form-group">
+                Mobile Number:
+                <input type="tel" class="form-control" placeholder="Enter the mobile name">
+            </div>
+            <div class="form-group">
+                BirthDay:
+                <input type="date" class="form-control" placeholder="Enter the birthdate">
+            </div>
+            <div class="form-group">
+                Email:
+                <input type="email" class="form-control" placeholder="Enter the email">
+            </div>
+
+
+            <div class="form-group">
+                Category:
+                <div class="radio">
+                    <label><input type="radio" value="Female"> Female </label>
+                </div>
+                <div class="radio">
+                    <label><input type="radio" value="Male"> Male </label>
+                </div>
+            </div>
+
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" checked> Remember me
+                </label>
+            </div>
+
+
+            <div class="form-group">
+                <input type="file" class="form-control" multiple>
+            </div>
+            <input class="btnbtn-danger" type="submit">
+            <input class="btnbtn-danger" type="reset">
+
+
+            <div class="progress">
+                <div class="progress-bar" style="width: 80%">
+                    <span>80% Complete</span>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li role="presentation" class="active"><a href="#">Home</a></li>
+        <li role="presentation"><a href="#">Profile</a></li>
+        <li role="presentation"><a href="#">Messages</a></li>
+    </ul>
+
+
+
+    <h1>Detect Now!</h1>
+
+    <title>Python Flask Upload Multiple Images and Display them</title>
+    <h2>Select multiple images to upload and display</h2>
+    <p>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class=flashes>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </p>
+
+    <form method="post" action="/detectnow" enctype="multipart/form-data">
+        <dl>
+            <p>
+                <input type="file" name="files[]" multiple="true" autocomplete="off" required>
+            </p>
+        </dl>
+        <p>
+            <input type="submit" value="Submit">
+        </p>
+    </form>
+
+    {% if filenames %}
+        {% for filename in filenames %}
+            <div>
+                <img src="{{ url_for('display_image', filename=filename) }}">
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
