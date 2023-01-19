@@ -3,39 +3,47 @@ from flask import render_template, redirect, request, flash, url_for
 from werkzeug.utils import secure_filename
 from app import app
 
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'jfif'])
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template("index.html", title='Home Page')
 
-
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 @app.route('/detectnow')
-def upload_form():
-	return render_template('/detectnow.html')
-
-@app.route('/detectnow', methods=['POST'])
 def detectnow():
-    if 'files[]' not in request.files:
+    return render_template('detectnow.html')
+
+
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    flash(os.path.join(app.config['UPLOAD_FOLDER']))
+    if 'file' not in request.files:
         flash('No file part')
         return redirect(request.url)
-    files = request.files.getlist('files[]')
-    file_names = []
-    for file in files:
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_names.append(filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    # else:
-    #	flash('Allowed image types are -> png, jpg, jpeg, gif')
-    #	return redirect(request.url)
-    return render_template('detectnow.html', filenames=file_names)
+    file = request.files['file']
+    if file.filename == '':
+        flash('No image selected for uploading')
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # print('upload_image filename: ' + filename)
+        flash('Image successfully uploaded and displayed below')
+        return render_template('detectnow.html', filename=filename)
+    else:
+        flash('Allowed image types are -> png, jpg, jpeg, gif')
+        return redirect(request.url)
+
+@app.route('/display/<filename>')
+def display_image(filename):
+    # print('display_image filename: ' + filename)
+    return redirect(url_for('static', filename='uploads/'+filename), code=301)
 
 
 @app.route('/settings')
@@ -48,7 +56,4 @@ def table():
 
 
 
-@app.route('/display_image/<filename>')
-def display_image(filename):
-    flash('full file name : ' + os.path.join(app.config['UPLOAD_FOLDER']) + filename)
-    return redirect(url_for('', filename=+os.path.join(app.config['UPLOAD_FOLDER']) + filename), code=301)
+

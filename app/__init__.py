@@ -6,6 +6,10 @@ from flask_migrate import Migrate
 
 from flask_bootstrap import Bootstrap
 
+# app = Flask(__name__,
+#             static_folder='/path/to/static',
+#             template_folder='/path/to/templates')
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
