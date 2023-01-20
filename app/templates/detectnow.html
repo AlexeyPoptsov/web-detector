@@ -2,22 +2,7 @@
 
 
 {% block app_content %}
-
-    <h1>Detect Now!</h1>
-
-    <title>Python Flask Upload Multiple Images and Display them</title>
-    <h2>Select multiple images to upload and display</h2>
-    <p>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <ul class=flashes>
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
-    </p>
+    <p>Select an image to upload and detect<p>
 
     <form method="post" action="/upload_image" enctype="multipart/form-data">
         <dl>
@@ -26,23 +11,39 @@
             </p>
         </dl>
         <p>
-            <input type="submit" class="btn btn-primary" value="Submit">
+            <input type="submit" class="btn btn-primary" value="Detect">
         </p>
-        <BR>
 
     </form>
-
-    <div class="progress">
-        <div class="progress-bar" style="width: 80%">
-            <span>80% Complete</span>
-        </div>
-    </div>
 
     {% if filename %}
         <div>
             <img src="{{ url_for('display_image', filename=filename) }}" width="100%">
+            <img src="{{ url_for('display_image', filename='result0.jpg') }}" width="100%">
+            <img src="{{ url_for('display_image', filename='result1.jpg') }}" width="100%">
+            <img src="{{ url_for('display_image', filename='result2.jpg') }}" width="100%">
+
         </div>
     {% endif %}
+
+    {#    <p>#}
+    {#        {% with messages = get_flashed_messages() %}#}
+    {#            {% if messages %}#}
+    {#                <ul class=flashes>#}
+    {#                    {% for message in messages %}#}
+    {#                        <li>{{ message }}</li>#}
+    {#                    {% endfor %}#}
+    {#                </ul>#}
+    {#            {% endif %}#}
+    {#        {% endwith %}#}
+    {#    </p>#}
+
+    {#    <div class="progress">#}
+    {#        <div class="progress-bar" style="width: 80%">#}
+    {#            <span>80% Complete</span>#}
+    {#        </div>#}
+    {#    </div>#}
+
 
 
 {% endblock %}

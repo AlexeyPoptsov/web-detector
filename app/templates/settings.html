@@ -1,5 +1,22 @@
 {% extends "base.html" %}
 
+{% block title %}{{ context.title }}{% endblock %}
 {% block app_content %}
     <h1>Detector settings</h1>
+    <table id="myTable" class="table table-bordered table-striped" style="width:100%">
+        <thead>
+        <tr>
+            <th> Parameter</th>
+            <th> Value</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for parameter in context.parameters %}
+            <tr>
+                <td> {{ parameter.name }}</td>
+                <td> {{ parameter.value }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

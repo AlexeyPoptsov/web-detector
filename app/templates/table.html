@@ -2,6 +2,112 @@
 
 {% block app_content %}
     <body>
+
+    <style>
+        body {
+            padding: 10px;
+        }
+
+        #exTab1 .tab-content {
+            color: white;
+            background-color: #4c79b4;
+            padding: 5px 15px;
+        }
+
+        #exTab2 h3 {
+            color: white;
+            background-color: #4c79b4;
+            padding: 5px 15px;
+        }
+
+        #exTab3 .tab-content {
+            color: white;
+            background-color: #4c79b4;
+            padding: 5px 15px;
+        }
+    </style>
+
+
+    <style>
+
+        @-webkit-keyframes scroll {
+            0% {
+                -webkit-transform: translate(0, 0);
+                transform: translate(0, 0);
+            }
+            100% {
+                -webkit-transform: translate(-100%, 0);
+                transform: translate(-100%, 0)
+            }
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(-100%, 0)
+            }
+        }
+
+        .marquee {
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .marquee * {
+            display: inline-block;
+            padding-left: 100%;
+            -webkit-animation: scroll 21s infinite linear;
+            animation: scroll 21s infinite linear;
+        }
+
+        .marquee *:hover {
+            -webkit-animation-play-state: paused;
+            animation-play-state: paused;
+        }
+    </style>
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 marquee"><h1>Анимированная бегущая строка на CSS для остановки наведите на текст</h1>
+        </div>
+    </div>
+
+    {#    <div class="container"><h1>Bootstrap tab panel example (using nav-pills) </h1></div>#}
+    <div id="exTab1" class="container">
+        <ul class="nav nav-pills">
+            <li class="active">
+                <a href="{{ url_for('index') }}" data-toggle="tab">Overview</a>
+            </li>
+            <li><a href="#2a" data-toggle="tab">Using nav-pills</a>
+            </li>
+            <li><a href="#3a" data-toggle="tab">Applying clearfix</a>
+            </li>
+            <li><a href="#4a" data-toggle="tab">Background color</a>
+            </li>
+        </ul>
+
+        {#        <div class="tab-content clearfix">#}
+        {#            <div class="tab-pane active" id="1a">#}
+        {#                <h3>Content's background color is the same for the tab</h3>#}
+        {#            </div>#}
+        {#            <div class="tab-pane" id="2a">#}
+        {#                <h3>We use the class nav-pills instead of nav-tabs which automatically creates a background color for#}
+        {#                    the tab</h3>#}
+        {#            </div>#}
+        {#            <div class="tab-pane" id="3a">#}
+        {#                <h3>We applied clearfix to the tab-content to rid of the gap between the tab and the content</h3>#}
+        {#            </div>#}
+        {#            <div class="tab-pane" id="4a">#}
+        {#                <h3>We use css to change the background color of the content to be equal to the tab</h3>#}
+        {#            </div>#}
+        {#        </div>#}
+    </div>
+
+
     <h1> Bootstrap Datatable </h1>
     <table id="myTable" class="table table-bordered table-striped" style="width:100%">
         <thead>
