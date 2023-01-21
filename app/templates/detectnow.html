@@ -2,7 +2,7 @@
 
 
 {% block app_content %}
-    <p>Select an image to upload and detect<p>
+    <b>Select an image to upload and detect</b>
 
     <form method="post" action="/upload_image" enctype="multipart/form-data">
         <dl>
@@ -18,10 +18,36 @@
 
     {% if filename %}
         <div>
+            <h3>Source image, shape: {{ context.origin_image_shape }},  transform shape: {{ context.image_shape }}   </h3>
             <img src="{{ url_for('display_image', filename=filename) }}" width="100%">
-            <img src="{{ url_for('display_image', filename='result0.jpg') }}" width="100%">
-            <img src="{{ url_for('display_image', filename='result1.jpg') }}" width="100%">
-            <img src="{{ url_for('display_image', filename='result2.jpg') }}" width="100%">
+            <h5 class="page-header"></h5>
+
+            {% for model_dict in context.models %}
+                <h3>Model: {{ model_dict['name'] }}, score threshold: {{ model_dict['score_threshold'] }}, time work: {{ model_dict['time']}} s.</h3>
+                <img src="{{ url_for('display_image', filename=model_dict['result_name']) }}" width="100%">
+                <table id="myTable" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th> Class</th>
+                        <th> Count</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for class in model_dict['count_classes'] %}
+                        <tr>
+                            <td> {{ class }}</td>
+                            <td> {{ model_dict['count_classes'][class] }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <h5 class="page-header"></h5>
+            {% endfor %}
+{##}
+{##}
+{#            <img src="{{ url_for('display_image', filename='result0.jpg') }}" width="100%">#}
+{#            <img src="{{ url_for('display_image', filename='result1.jpg') }}" width="100%">#}
+{#            <img src="{{ url_for('display_image', filename='result2.jpg') }}" width="100%">#}
 
         </div>
     {% endif %}

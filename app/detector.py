@@ -9,6 +9,7 @@ import torch
 import mmcv
 import time
 from mmdet.apis import inference_detector, init_detector, show_result_pyplot
+from collections import Counter
 
 
 # print(torch.cuda.get_device_properties(DEVICE))
@@ -80,8 +81,7 @@ class Detector(object):
             self.models.append(model_dict)
         self.score_threshold = 0.3
 
-    def load_transform(self, image_name):
-        img = mmcv.imread(image_name)
+    def transform(self, img):
         ratio = 1.0
         if (img.shape[1] > 1280) or (img.shape[0] > 1280):
             if (img.shape[1] > img.shape[0]):
@@ -94,26 +94,72 @@ class Detector(object):
 
         return img
 
+    def count_classes(self, model, result):
+        if type(result) == list:
+            bbox_result = result
+        else:
+            # if instance segmentation
+            bbox_result, segm_result = result
+
+        labels = [np.full(bbox.shape[0], i, dtype=np.int32) for i, bbox in enumerate(bbox_result)]
+
+        labels = np.concatenate(labels)
+        bboxes = np.vstack(bbox_result)
+
+        # Номера боксов c уверенностью выше
+        labels_impt = np.where(bboxes[:, -1] > self.score_threshold)[0]
+
+        # Уверенность для этих номеров
+        confidence_imp = bboxes[bboxes[:, -1] > self.score_threshold][:, 4]
+
+        # Коды классов для этих номеров
+        labels_impt_list = [labels[i] for i in labels_impt]
+
+        classes_names = model.CLASSES
+
+        # Названия классов для номеров боксов
+        labels_class = [classes_names[i] for i in labels_impt_list]
+
+        result_dict = Counter(labels_class)
+
+        return result_dict
+
     def get_result(self, image_name):
         fig = plt.figure()
-        img = self.load_transform(image_name)
+
+        img = mmcv.imread(image_name)
+        self.origin_image_shape = (img.shape[1], img.shape[0], img.shape[2])
+
+        img = self.transform(img)
+        self.image_shape = (img.shape[1], img.shape[0], img.shape[2])
+
 
         for i, model_dict in enumerate(self.models):
             model = model_dict['model']
+            start_time = time.time()
             result = inference_detector(model, img)
-            result_name = self.path_images + f'result{i}.jpg'
-            model.show_result(img, result, score_thr=self.score_threshold, show=False, out_file=result_name)
-        plt.close(fig)
-        # plt.imshow(model.show_result(img[:, :, ::-1], result, score_thr=0.3, show=False, out_file = result_name))
-        # plt.show()
+            work_time = time.time() - start_time
 
+            self.models[i]['count_classes'] = self.count_classes(model, result)
 
-# >>> import os
-# >>> base=os.path.basename('/root/dir/sub/file.ext')
-# >>> base
-# 'file.ext'
-# >>> os.path.splitext(base)
+            result_name = f'result{i}.jpg'
+            self.models[i]['result_name'] = result_name
+            self.models[i]['score_threshold'] = self.score_threshold
+            self.models[i]['time'] = f'{work_time:.4f}'
 
-if __name__ == '__main__':
-    detector = Detector(model_IDs=[0, 1, 2], path_images='F:/python/web-detector/app/static/uploads/')
-    detector.get_result(r'F:/python/web-detector/app/static/uploads/demo.jpg')
+            model.show_result(img, result, score_thr=self.score_threshold, show=False, out_file=self.path_images + result_name)
+
+            plt.close(fig)
+
+            # plt.imshow(model.show_result(img[:, :, ::-1], result, score_thr=0.3, show=False, out_file = result_name))
+            # plt.show()
+
+    # >>> import os
+    # >>> base=os.path.basename('/root/dir/sub/file.ext')
+    # >>> base
+    # 'file.ext'
+    # >>> os.path.splitext(base)
+
+    if __name__ == '__main__':
+        detector = Detector(model_IDs=[0, 1, 2], path_images='F:/python/web-detector/app/static/uploads/')
+        detector.get_result(r'F:/python/web-detector/app/static/uploads/demo.jpg')

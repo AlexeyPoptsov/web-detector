@@ -37,9 +37,16 @@ def upload_image():
         file.save(save_name)
         detector.get_result(save_name)
 
-        # print('upload_image filename: ' + filename)
-        #flash('Image successfully uploaded and displayed below')
-        return render_template('detectnow.html', filename=filename)
+        context = {}
+        context['image_shape'] = detector.image_shape
+        context['origin_image_shape'] = detector.origin_image_shape
+
+        context['models'] = []
+        for i, model_dict in enumerate(detector.models):
+            context['models'].append(model_dict)
+
+
+        return render_template('detectnow.html', filename=filename, context=context)
     else:
         #flash('Allowed image types are -> png, jpg, jpeg, gif')
         return redirect(request.url)

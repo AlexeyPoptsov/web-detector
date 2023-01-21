@@ -1,7 +1,7 @@
 {% extends 'bootstrap/base.html' %}
 
 {% block title %}
-    {% if title %}{{ title }} - WEB-Detector{% else %}Welcome to WEB-Detector{% endif %}
+    {% if title %}{{ title }} - WEB.Detector{% else %}Welcome to WEB.Detector{% endif %}
 {% endblock %}
 
 {% block navbar %}
@@ -10,50 +10,23 @@
             filter: alpha(Opacity=50);
             opacity: 0.5;
         }
-
-        body {
-            padding: 10px;
-        }
-
-        #exTab1 .tab-content {
-            color: white;
-            background-color: #4c79b4;
-            padding: 5px 15px;
-        }
-
-        #exTab2 h3 {
-            color: white;
-            background-color: #4c79b4;
-            padding: 5px 15px;
-        }
-
-        #exTab3 .tab-content {
-            color: white;
-            background-color: #4c79b4;
-            padding: 5px 15px;
-        }
-
     </style>
 
     <div id="exTab1" class="container">
         <div class="navbar-header">
             <table>
                 <td>
-                    <img src="{{ url_for('display_image', filename='dl.jpg') }}" width="50" class="transparent50">
+                    <img href="{{ url_for('index')}}" src="{{ url_for('display_image', filename='dl.jpg') }}" width="40" class="transparent50">
                 </td>
                 <td>
-{#                    <a class="navbar-brand" href="{{ url_for('index') }}">WEB-Detector</a>#}
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item"><a class="active" href="{{ url_for('index') }}">WEB.Detector</a></li>
+                        <li class="nav-item"><a href="{{ url_for('detectnow') }}">DETECT NOW</a></li>
+                        <li class="nav-item"><a href="{{ url_for('settings') }}">SETTINGS</a></li>
+                    </ul>
                 </td>
             </table>
-
         </div>
-
-        <ul class="nav nav-tabs">
-            <li class="nav-item"><a class="active" href="{{ url_for('index') }}">WEBDetector</a></li>
-            <li class="nav-item"><a href="{{ url_for('detectnow') }}">Detect Now</a></li>
-            <li class="nav-item"><a href="{{ url_for('settings') }}">Settings</a></li>
-            <li class="nav-item"><a href="{{ url_for('table') }}">table</a></li>
-        </ul>
     </div>
 
 
