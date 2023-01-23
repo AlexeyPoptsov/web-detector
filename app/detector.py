@@ -62,24 +62,43 @@ class Detector(object):
 
         self.models: list = []
 
-        if 0 in self.model_IDs:
-            model_dict = dict(name='mask_rcnn', config=MODEL_CONFIG_FILES + 'ms_rcnn_x101_64x4d_fpn_1x_coco.py',
-                              checkpoint=MODEL_CONFIG_FILES + 'ms_rcnn_x101_64x4d_fpn_1x_coco_20200206-86ba88d2.pth')
-            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-            self.models.append(model_dict)
+        # if 0 in self.model_IDs:
+        #     model_dict = dict(name='mask_rcnn', config=MODEL_CONFIG_FILES + 'ms_rcnn_x101_64x4d_fpn_1x_coco.py',
+        #                       checkpoint=MODEL_CONFIG_FILES + 'ms_rcnn_x101_64x4d_fpn_1x_coco_20200206-86ba88d2.pth')
+        #     self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+        #     model_dict['model'] = self.model_SEG
+        #     self.models.append(model_dict)
 
-        if 1 in self.model_IDs:
-            model_dict = dict(name='faster_rcnn', config=MODEL_CONFIG_FILES + 'faster_rcnn_x101_64x4d_fpn_1x_coco.py',
-                              checkpoint=MODEL_CONFIG_FILES + 'faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth')
-            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-            self.models.append(model_dict)
+        # if 1 in self.model_IDs:
+        #     model_dict = dict(name='faster_rcnn_x101', config=MODEL_CONFIG_FILES + 'faster_rcnn_x101_64x4d_fpn_1x_coco.py',
+        #                       checkpoint=MODEL_CONFIG_FILES + 'faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth')
+        #     model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+        #     self.models.append(model_dict)
 
         if 2 in self.model_IDs:
             model_dict = dict(name='yolo3', config=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth')
-            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            self.model_YOLO3 = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['model'] = self.model_YOLO3
             self.models.append(model_dict)
         self.score_threshold = 0.3
+
+        if 3 in self.model_IDs:
+            model_dict = dict(name='faster_rcnn_r50', config=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco.py',
+                              checkpoint=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco_20220320_085147-efedfda4.pth')
+            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            self.models.append(model_dict)
+
+        if 4 in self.model_IDs:
+            model_dict = dict(name='mask_rcnn_r50', config=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
+                              checkpoint=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth ')
+            self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['model'] = self.model_SEG
+            self.models.append(model_dict)
+
+
+
+
 
     def transform(self, img):
         ratio = 1.0
@@ -124,6 +143,22 @@ class Detector(object):
 
         return result_dict
 
+
+    def detect_YOLO3(self, img):
+        result = inference_detector(self.model_YOLO3, img)
+        img = self.model_YOLO3.show_result(img, result, score_thr=self.score_threshold, show=False)
+
+        return img
+
+    def detect_SEG(self, img):
+        result = inference_detector(self.model_SEG, img)
+        img = self.model_SEG.show_result(img, result, score_thr=self.score_threshold, show=False)
+
+        return img
+
+
+
+
     def get_result(self, image_name):
         fig = plt.figure()
 
@@ -136,6 +171,11 @@ class Detector(object):
 
         for i, model_dict in enumerate(self.models):
             model = model_dict['model']
+
+            ## Первое обращение очень медленное, для корректного измерения времени одно пустое предсказание
+            if i == 0:
+                result = inference_detector(model, img)
+
             start_time = time.time()
             result = inference_detector(model, img)
             work_time = time.time() - start_time
