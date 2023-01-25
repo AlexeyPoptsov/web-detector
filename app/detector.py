@@ -11,7 +11,6 @@ import time
 from mmdet.apis import inference_detector, init_detector, show_result_pyplot
 from collections import Counter
 
-
 # print(torch.cuda.get_device_properties(DEVICE))
 
 # img_name1 = 'static/uploads/1559AE33-326E-4C9F-845E-299F62F2676F.jpeg'
@@ -95,6 +94,13 @@ class Detector(object):
             self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
             model_dict['model'] = self.model_SEG
             self.models.append(model_dict)
+
+        # if 5 in self.model_IDs:
+        #     model_dict = dict(name='YOLO8', config='', checkpoint='')
+        #     self.model_YOLO8 = model = YOLO('yolov8n.pt')
+        #     model_dict['model'] = self.model_YOLO8
+        #     self.models.append(model_dict)
+
 
 
 

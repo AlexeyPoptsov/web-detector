@@ -5,12 +5,14 @@ from werkzeug.utils import secure_filename
 from app import app
 from app import detector, video, socketio
 import cv2
+import time
 
 from flask_socketio import SocketIO, emit
 from PIL import Image
 import base64,cv2
 import numpy as np
 import pyshine as ps
+
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'jfif'])
 
@@ -86,6 +88,7 @@ def table():
 def gen(video):
     while True:
         success, image = video.read()
+        recv_time = time.time()
         # frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # frame_gray = cv2.equalizeHist(frame_gray)
 
