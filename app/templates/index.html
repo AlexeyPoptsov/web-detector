@@ -2,55 +2,111 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <style>
-        @-webkit-keyframes scroll {
-            0% {
-                -webkit-transform: translate(0, 0);
-                transform: translate(0, 0);
-            }
-            100% {
-                -webkit-transform: translate(-100%, 0);
-                transform: translate(-100%, 0)
-            }
-        }
+    {#    <style>#}
+    {#        @-webkit-keyframes scroll {#}
+    {#            0% {#}
+    {#                -webkit-transform: translate(0, 0);#}
+    {#                transform: translate(0, 0);#}
+    {#            }#}
+    {#            100% {#}
+    {#                -webkit-transform: translate(-100%, 0);#}
+    {#                transform: translate(-100%, 0)#}
+    {#            }#}
+    {#        }#}
+    {##}
+    {#        @keyframes scroll {#}
+    {#            0% {#}
+    {#                transform: translate(0, 0);#}
+    {#            }#}
+    {#            100% {#}
+    {#                transform: translate(-100%, 0)#}
+    {#            }#}
+    {#        }#}
+    {##}
+    {#        .marquee {#}
+    {#            max-width: 100%;#}
+    {#            white-space: nowrap;#}
+    {#            overflow: hidden;#}
+    {#        }#}
 
-        @keyframes scroll {
-            0% {
-                transform: translate(0, 0);
-            }
-            100% {
-                transform: translate(-100%, 0)
-            }
-        }
+    {#        .marquee * {#}
+    {#            display: inline-block;#}
+    {#            padding-left: 100%;#}
+    {#            -webkit-animation: scroll 21s infinite linear;#}
+    {#            animation: scroll 21s infinite linear;#}
+    {#        }#}
+    {##}
+    {#        .marquee *:hover {#}
+    {#            -webkit-animation-play-state: paused;#}
+    {#            animation-play-state: paused;#}
+    {#        }#}
+    {#    </style>#}
 
-        .marquee {
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-        }
+    {#    <div class="container">#}
+    {#        <div class="row">#}
+    {#            <div class="col-xs-12 marquee">#}
+    {#                <h1>WEB.Detector is the most powerful tool for recognizing objects in images. Just upload an image and#}
+    {#                    you'll see what's in there. Usability, fast, beautiful... @Alexey Poptsov, Deep Learning School, January 2023, https://t.me/alexeypoptsov#}
+    {#                </h1>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>#}
 
-        .marquee * {
-            display: inline-block;
-            padding-left: 100%;
-            -webkit-animation: scroll 21s infinite linear;
-            animation: scroll 21s infinite linear;
-        }
 
-        .marquee *:hover {
-            -webkit-animation-play-state: paused;
-            animation-play-state: paused;
-        }
-    </style>
 
     <div class="container">
-        <div class="row">
-            <div class="col-xs-12 marquee">
-                <h1>WEB.Detector is the most powerful tool for recognizing objects in images. Just upload an image and
-                    you'll see what's in there. Usability, fast, beautiful... @Alexey Poptsov, Deep Learning School, January 2023, https://t.me/alexeypoptsov
-                </h1>
+        <div class="page-header">
+            <p class="lead">WEB.Detector is the most powerful tool for recognizing objects in images. Just upload an
+                image, and you'll see what's in there. Usability, fast, beautiful...</p>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title">IMAGE DETECTING</h2>
+            </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-5">
+                        <img vertical-align="center" href="{{ url_for('detectnow') }}"
+                             src="{{ url_for('display_image', filename='di.jpg') }}"
+                             width="300"></div>
+                    <div>
+                        <h4>Detecting and counting objects in image</h4>
+                        <p>WEB.Detector analyzes the loaded image according to several models. Detects and counts the
+                            number of objects by class. In addition, the performance of each model is evaluated.</p>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="hr">
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2 class="panel-title">WEBCAM DETECTING</h2>
+            </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-5">
+                        <img vertical-align="center" href="{{ url_for('detectnow') }}"
+                             src="{{ url_for('display_image', filename='dwc.jpg') }}"
+                             width="300"></div>
+                    <div>
+                        <h4>Online detection of objects from broadcast webcam</h4>
+                        <p>WEB.Detector analyzes the live feed from the webcam. Detects and counts objects.
+                            Additionally, the stream processing speed is calculated. The detection can be performed by
+                            any of the models available in the detector.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-
+    <footer class="footer">
+    Alexey Poptsov, @alexeypoptsov, Deep Learning school, january 2023
+    </footer>
 {% endblock %}

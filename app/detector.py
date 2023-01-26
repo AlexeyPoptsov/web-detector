@@ -1,7 +1,6 @@
 import numpy as np
 
 import matplotlib
-
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
@@ -95,7 +94,15 @@ class Detector(object):
             model_dict['model'] = self.model_SEG
             self.models.append(model_dict)
 
-        # if 5 in self.model_IDs:
+        if 5 in self.model_IDs:
+            model_dict = dict(name='vfnet_r101', config=MODEL_CONFIG_FILES + 'vfnet_r101_fpn_mstrain_2x_coco.py',
+                              checkpoint=MODEL_CONFIG_FILES + 'vfnet_r101_fpn_mstrain_2x_coco_20201027pth-4a5d53f1.pth')
+            self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['model'] = self.model_SEG
+            self.models.append(model_dict)
+
+
+        # if 6 in self.model_IDs:
         #     model_dict = dict(name='YOLO8', config='', checkpoint='')
         #     self.model_YOLO8 = model = YOLO('yolov8n.pt')
         #     model_dict['model'] = self.model_YOLO8
@@ -161,6 +168,14 @@ class Detector(object):
         img = self.model_SEG.show_result(img, result, score_thr=self.score_threshold, show=False)
 
         return img
+
+    def detect(self, img, ID =0):
+        result = inference_detector(self.models[ID]['model'], img)
+        img = self.model_SEG.show_result(img, result, score_thr=self.score_threshold, show=False)
+        count_classes = self.count_classes(self.models[ID]['model'], result)
+
+        return (img,count_classes)
+
 
 
 

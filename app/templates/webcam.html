@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+
+
+    <div class="form-group">
+        <form method="post" action="{{ url_for('webcam') }}">
+            <label>Model select</label>
+            <p>
+                <select class="form-control" name="ModelSelect"">
+                {% for model_dict in context.models %}
+                    {% if loop.index0 == context['model_ID'] %}
+                        <option selected='True' value={{ model_dict['ID'] }}>{{ model_dict['model_name'] }}</option>
+                    {% else %}
+                        <option value={{ model_dict['ID'] }}>{{ model_dict['model_name'] }}</option>
+                    {% endif %}
+
+                {% endfor %}
+
+                </select>
+            </p>
+
+            {#            <button type="submit" class="btn btn-default">Select</button>#}
+            <p>
+                <input type="submit" class="btn btn-primary" value="Select">
+            </p>
+
+            <br>
+
+            <div class="embed-responsive embed-responsive-16by9" width="auto" height="auto">
+                <iframe id="Iframe" width="100%" height="100%" class="embed-responsive-item"
+                        src={{ url_for("video_feed", ID=2) }} allowfullscreen></iframe>
+            </div>
+        </form>
+    </div>
+
+
+    {##}
+    {#          </div>#}
+
+
+    {#    <script>#}
+    {#        var e = document.getElementById("ModelSelect");#}
+    {#        var webcam_id = e.options[e.selectedIndex].value;#}
+    {#        document.querySelector(".webcam_label").textContent = webcam_id#}
+    {##}
+    {#        e.addEventListener("change", (event) => {#}
+    {#            var webcam_id = e.options[e.selectedIndex].value;#}
+    {#            document.querySelector(".webcam_label").textContent = webcam_id#}
+    {#        })#}
+    {#    </script>#}
+
+
+{% endblock %}
+
+
+
