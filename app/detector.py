@@ -4,42 +4,17 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
+import cv2
+
 import torch
-import mmcv
-import time
-from mmdet.apis import inference_detector, init_detector, show_result_pyplot
+from mmdet.apis import inference_detector, init_detector
 from collections import Counter
 
-# print(torch.cuda.get_device_properties(DEVICE))
+import time
 
-# img_name1 = 'static/uploads/1559AE33-326E-4C9F-845E-299F62F2676F.jpeg'
+FPS = np.zeros(5)
+FPS_index = 0
 
-# plt.imshow(img[:, :, ::-1]);
-# plt.show()
-#
-# imgs = []
-# for i, model_dict in enumerate(models):
-#     # plt.sca(ax[i])
-#     # initialize the detector
-#     model = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-#
-#     start_time = time.time()
-#     # Use the detector to do inference
-#     result = inference_detector(model, img[:, :, ::-1])
-#
-#     # Let's plot the result
-#     # show_result_pyplot(model, img, result, score_thr=0.3, title=model_dict['name'])
-#     # imgs.append(model.show_result(img[:,:,::-1], result, score_thr=0.3, show=False))
-#
-#     models[i]['result'] = model.show_result(img[:, :, ::-1], result, score_thr=0.3, show=False)
-#     models[i]['time'] = time.time() - start_time
-#
-# plt.figure(figsize=(20, 5))
-# for i, model_dict in enumerate(models):
-#     plt.subplot(1, 3, i + 1)
-#     plt.imshow(model_dict['result'])
-# plt.show()
-#
 
 class Detector(object):
     def __init__(self, model_IDs: list, path_images: str):
@@ -60,58 +35,46 @@ class Detector(object):
 
         self.models: list = []
 
-        # if 0 in self.model_IDs:
-        #     model_dict = dict(name='mask_rcnn', config=MODEL_CONFIG_FILES + 'ms_rcnn_x101_64x4d_fpn_1x_coco.py',
-        #                       checkpoint=MODEL_CONFIG_FILES + 'ms_rcnn_x101_64x4d_fpn_1x_coco_20200206-86ba88d2.pth')
-        #     self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-        #     model_dict['model'] = self.model_SEG
-        #     self.models.append(model_dict)
-
-        # if 1 in self.model_IDs:
-        #     model_dict = dict(name='faster_rcnn_x101', config=MODEL_CONFIG_FILES + 'faster_rcnn_x101_64x4d_fpn_1x_coco.py',
-        #                       checkpoint=MODEL_CONFIG_FILES + 'faster_rcnn_x101_64x4d_fpn_1x_coco_20200204-833ee192.pth')
-        #     model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-        #     self.models.append(model_dict)
 
         if 2 in self.model_IDs:
-            model_dict = dict(name='yolo3', config=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco.py',
+            model_dict = dict(name='YOLOv3', config=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth')
-            self.model_YOLO3 = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-            model_dict['model'] = self.model_YOLO3
+            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
             self.models.append(model_dict)
         self.score_threshold = 0.3
 
         if 3 in self.model_IDs:
-            model_dict = dict(name='faster_rcnn_r50', config=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco.py',
+            model_dict = dict(name='faster_rcnn_r50',
+                              config=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco_20220320_085147-efedfda4.pth')
             model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
             self.models.append(model_dict)
+            # mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 
         if 4 in self.model_IDs:
-            model_dict = dict(name='mask_rcnn_r50', config=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
+            model_dict = dict(name='mask_rcnn_r50',
+                              config=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth ')
-            self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-            model_dict['model'] = self.model_SEG
+            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
             self.models.append(model_dict)
 
         if 5 in self.model_IDs:
             model_dict = dict(name='vfnet_r101', config=MODEL_CONFIG_FILES + 'vfnet_r101_fpn_mstrain_2x_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'vfnet_r101_fpn_mstrain_2x_coco_20201027pth-4a5d53f1.pth')
-            self.model_SEG = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
-            model_dict['model'] = self.model_SEG
+            model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
             self.models.append(model_dict)
 
+        # if 10 in self.model_IDs:
+        #     model_dict = dict(name='YOLOv5', config=MODEL_CONFIG_FILES + 'yolov5_m-p6-v62_syncbn_fast_8xb16-300e_coco.py ',
+        #                       checkpoint=MODEL_CONFIG_FILES + 'yolov5_m-p6-v62_syncbn_fast_8xb16-300e_coco_20221027_230453-49564d58.pth ')
+        #     model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+        #     self.models.append(model_dict)
 
         # if 6 in self.model_IDs:
         #     model_dict = dict(name='YOLO8', config='', checkpoint='')
         #     self.model_YOLO8 = model = YOLO('yolov8n.pt')
         #     model_dict['model'] = self.model_YOLO8
         #     self.models.append(model_dict)
-
-
-
-
-
 
     def transform(self, img):
         ratio = 1.0
@@ -120,9 +83,8 @@ class Detector(object):
                 ratio = 1280 / img.shape[1]
             else:
                 ratio = 1280 / img.shape[0]
-        # new_width = 500
-        # ratio = new_width / img.shape[1]
-        img = mmcv.imresize(img, (np.int32(ratio * img.shape[1]), np.int32(ratio * img.shape[0])), return_scale=False)
+        #img = mmcv.imresize(img, (np.int32(ratio * img.shape[1]), np.int32(ratio * img.shape[0])), return_scale=False)
+        img =cv2.resize(img, (np.int32(ratio * img.shape[1]), np.int32(ratio * img.shape[0])), interpolation = cv2.INTER_AREA)
 
         return img
 
@@ -134,7 +96,6 @@ class Detector(object):
             bbox_result, segm_result = result
 
         labels = [np.full(bbox.shape[0], i, dtype=np.int32) for i, bbox in enumerate(bbox_result)]
-
         labels = np.concatenate(labels)
         bboxes = np.vstack(bbox_result)
 
@@ -156,39 +117,58 @@ class Detector(object):
 
         return result_dict
 
-
-    def detect_YOLO3(self, img):
-        result = inference_detector(self.model_YOLO3, img)
-        img = self.model_YOLO3.show_result(img, result, score_thr=self.score_threshold, show=False)
-
-        return img
-
-    def detect_SEG(self, img):
-        result = inference_detector(self.model_SEG, img)
-        img = self.model_SEG.show_result(img, result, score_thr=self.score_threshold, show=False)
-
-        return img
-
-    def detect(self, img, ID =0):
-        result = inference_detector(self.models[ID]['model'], img)
-        img = self.model_SEG.show_result(img, result, score_thr=self.score_threshold, show=False)
+    def detect_from_frame(self, img, ID=0):
+        model = self.models[ID]['model']
+        result = inference_detector(model, img)
+        img = model.show_result(img, result, score_thr=self.score_threshold, show=False)
         count_classes = self.count_classes(self.models[ID]['model'], result)
 
-        return (img,count_classes)
+        return (img, count_classes)
 
+    def show_frame(self, img, ID):
+        start_time = time.time()
 
+        # perform the resizing
+        # h = 320.0
+        # r = h / image.shape[0]
+        # dim = (int(image.shape[1] * r), int(h))
+        # image = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
+        image, count_classes = self.detect_from_frame(img, ID)
 
+        # draw classes block
+        x = image.shape[1] - 200
+        y = image.shape[0] - 150
+        cv2.putText(image, 'Detected objects', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, .5, (192, 192, 192), 2)
+        image = cv2.rectangle(image, (x, y), (x + 200 - 2, y + 200 - 2), (192, 192, 192), 1)
+        step = 20
+        for _class in count_classes:
+            cv2.putText(image,
+                        f'{_class}: {count_classes[_class]}',
+                        (x + 10, y + step),
+                        cv2.FONT_HERSHEY_SIMPLEX, .5, (192, 192, 192), 1)
+            step += 20
 
-    def get_result(self, image_name):
+        work_time = time.time() - start_time
+        global FPS, FPS_index
+        FPS_index = (FPS_index + 1) % 5
+        FPS[FPS_index] = (1 / work_time)
+        cv2.putText(image, f'({image.shape[1]}x{image.shape[0]}), FPS: {FPS.mean():.2f}',
+                    (x + 10, y + 140), cv2.FONT_HERSHEY_SIMPLEX, .5, (192, 192, 192), 1)
+
+        ret, jpeg = cv2.imencode('.jpg', image)
+        frame = jpeg.tobytes()
+
+        return frame
+
+    def detect_from_file(self, image_name):
         fig = plt.figure()
 
-        img = mmcv.imread(image_name)
+        img = cv2.imread(image_name)
         self.origin_image_shape = (img.shape[1], img.shape[0], img.shape[2])
 
         img = self.transform(img)
         self.image_shape = (img.shape[1], img.shape[0], img.shape[2])
-
 
         for i, model_dict in enumerate(self.models):
             model = model_dict['model']
@@ -208,19 +188,11 @@ class Detector(object):
             self.models[i]['score_threshold'] = self.score_threshold
             self.models[i]['time'] = f'{work_time:.4f}'
 
-            model.show_result(img, result, score_thr=self.score_threshold, show=False, out_file=self.path_images + result_name)
+            model.show_result(img, result, score_thr=self.score_threshold, show=False,
+                              out_file=self.path_images + result_name)
 
             plt.close(fig)
 
-            # plt.imshow(model.show_result(img[:, :, ::-1], result, score_thr=0.3, show=False, out_file = result_name))
-            # plt.show()
-
-    # >>> import os
-    # >>> base=os.path.basename('/root/dir/sub/file.ext')
-    # >>> base
-    # 'file.ext'
-    # >>> os.path.splitext(base)
-
     if __name__ == '__main__':
-        detector = Detector(model_IDs=[0, 1, 2], path_images='F:/python/web-detector/app/static/uploads/')
+        detector = Detector(model_IDs=[0, 1, 2, 3, 4, 5], path_images='/app/static/uploads/')
         detector.get_result(r'F:/python/web-detector/app/static/uploads/demo.jpg')

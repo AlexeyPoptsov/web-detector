@@ -18,12 +18,14 @@
 
     {% if filename %}
         <div>
-            <h3>Source image, shape: {{ context.origin_image_shape }},  transform shape: {{ context.image_shape }}   </h3>
+            <h3>Source image, shape: {{ context.origin_image_shape }}, transform
+                shape: {{ context.image_shape }}   </h3>
             <img src="{{ url_for('display_image', filename=filename) }}" width="100%">
             <h5 class="page-header"></h5>
 
             {% for model_dict in context.models %}
-                <h3>Model: {{ model_dict['name'] }}, score threshold: {{ model_dict['score_threshold'] }}, time work: {{ model_dict['time']}} s.</h3>
+                <h3>Model: {{ model_dict['name'] }}, score threshold: {{ model_dict['score_threshold'] }}, time
+                    work: {{ model_dict['time'] }} s.</h3>
                 <img src="{{ url_for('display_image', filename=model_dict['result_name']) }}" width="100%">
                 <table id="myTable" class="table table-bordered table-striped" style="width:100%">
                     <thead>
@@ -43,33 +45,7 @@
                 </table>
                 <h5 class="page-header"></h5>
             {% endfor %}
-{##}
-{##}
-{#            <img src="{{ url_for('display_image', filename='result0.jpg') }}" width="100%">#}
-{#            <img src="{{ url_for('display_image', filename='result1.jpg') }}" width="100%">#}
-{#            <img src="{{ url_for('display_image', filename='result2.jpg') }}" width="100%">#}
-
         </div>
     {% endif %}
-
-    {#    <p>#}
-    {#        {% with messages = get_flashed_messages() %}#}
-    {#            {% if messages %}#}
-    {#                <ul class=flashes>#}
-    {#                    {% for message in messages %}#}
-    {#                        <li>{{ message }}</li>#}
-    {#                    {% endfor %}#}
-    {#                </ul>#}
-    {#            {% endif %}#}
-    {#        {% endwith %}#}
-    {#    </p>#}
-
-    {#    <div class="progress">#}
-    {#        <div class="progress-bar" style="width: 80%">#}
-    {#            <span>80% Complete</span>#}
-    {#        </div>#}
-    {#    </div>#}
-
-
 
 {% endblock %}
