@@ -27,6 +27,8 @@ class Detector(object):
 
         self.path_images: str = path_images
 
+        #self.score_threshold = 0.4
+
         if torch.cuda.is_available():
             self.DEVICE = torch.device('cuda')
         else:
@@ -34,34 +36,35 @@ class Detector(object):
         self.device_properties = torch.cuda.get_device_properties(self.DEVICE)
 
         self.models: list = []
-
-
         if 2 in self.model_IDs:
             model_dict = dict(name='YOLOv3', config=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth')
             model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['score_threshold'] =0.2
             self.models.append(model_dict)
-        self.score_threshold = 0.3
+
 
         if 3 in self.model_IDs:
             model_dict = dict(name='faster_rcnn_r50',
                               config=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'faster_rcnn_r50_fpn_tnr-pretrain_1x_coco_20220320_085147-efedfda4.pth')
             model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['score_threshold'] = 0.6
             self.models.append(model_dict)
-            # mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
 
         if 4 in self.model_IDs:
             model_dict = dict(name='mask_rcnn_r50',
                               config=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth ')
             model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['score_threshold'] = 0.5
             self.models.append(model_dict)
 
         if 5 in self.model_IDs:
             model_dict = dict(name='vfnet_r101', config=MODEL_CONFIG_FILES + 'vfnet_r101_fpn_mstrain_2x_coco.py',
                               checkpoint=MODEL_CONFIG_FILES + 'vfnet_r101_fpn_mstrain_2x_coco_20201027pth-4a5d53f1.pth')
             model_dict['model'] = init_detector(model_dict['config'], model_dict['checkpoint'], device='cuda:0')
+            model_dict['score_threshold'] = 0.4
             self.models.append(model_dict)
 
         # if 10 in self.model_IDs:
@@ -77,18 +80,18 @@ class Detector(object):
         #     self.models.append(model_dict)
 
     def transform(self, img):
+        # mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375]
         ratio = 1.0
         if (img.shape[1] > 1280) or (img.shape[0] > 1280):
             if (img.shape[1] > img.shape[0]):
                 ratio = 1280 / img.shape[1]
             else:
                 ratio = 1280 / img.shape[0]
-        #img = mmcv.imresize(img, (np.int32(ratio * img.shape[1]), np.int32(ratio * img.shape[0])), return_scale=False)
         img =cv2.resize(img, (np.int32(ratio * img.shape[1]), np.int32(ratio * img.shape[0])), interpolation = cv2.INTER_AREA)
 
         return img
 
-    def count_classes(self, model, result):
+    def count_classes(self, model, score_threshold, result):
         if type(result) == list:
             bbox_result = result
         else:
@@ -100,10 +103,10 @@ class Detector(object):
         bboxes = np.vstack(bbox_result)
 
         # Номера боксов c уверенностью выше
-        labels_impt = np.where(bboxes[:, -1] > self.score_threshold)[0]
+        labels_impt = np.where(bboxes[:, -1] > score_threshold)[0]
 
         # Уверенность для этих номеров
-        confidence_imp = bboxes[bboxes[:, -1] > self.score_threshold][:, 4]
+        confidence_imp = bboxes[bboxes[:, -1] > score_threshold][:, 4]
 
         # Коды классов для этих номеров
         labels_impt_list = [labels[i] for i in labels_impt]
@@ -119,9 +122,11 @@ class Detector(object):
 
     def detect_from_frame(self, img, ID=0):
         model = self.models[ID]['model']
+        score_threshold = self.models[ID]['score_threshold']
+
         result = inference_detector(model, img)
-        img = model.show_result(img, result, score_thr=self.score_threshold, show=False)
-        count_classes = self.count_classes(self.models[ID]['model'], result)
+        img = model.show_result(img, result, score_thr=score_threshold, show=False)
+        count_classes = self.count_classes(self.models[ID]['model'], score_threshold, result)
 
         return (img, count_classes)
 
@@ -181,15 +186,17 @@ class Detector(object):
             result = inference_detector(model, img)
             work_time = time.time() - start_time
 
-            self.models[i]['count_classes'] = self.count_classes(model, result)
+            score_threshold = model_dict['score_threshold']
+
+            self.models[i]['count_classes'] = self.count_classes(model, score_threshold, result)
 
             result_name = f'result{i}.jpg'
             self.models[i]['result_name'] = result_name
-            self.models[i]['score_threshold'] = self.score_threshold
             self.models[i]['time'] = f'{work_time:.4f}'
 
-            model.show_result(img, result, score_thr=self.score_threshold, show=False,
+            model.show_result(img, result, score_thr=score_threshold, show=False,
                               out_file=self.path_images + result_name)
+            self.models[i]['score_threshold'] = score_threshold
 
             plt.close(fig)
 

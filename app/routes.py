@@ -6,6 +6,8 @@ from werkzeug.utils import secure_filename
 from app import app
 from app import detector, video
 
+import cv2
+
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'jfif'])
 
 model_ID = 0
@@ -65,8 +67,8 @@ def settings():
     context['parameters'] = []
     context['parameters'].append({'name': 'CUDA', 'value': detector.device_properties, })
     for i, model_dict in enumerate(detector.models):
-        context['parameters'].append({'name': f'Model {i}', 'value': model_dict['name'], })
-    context['parameters'].append({'name': 'score threshold', 'value': detector.score_threshold, })
+        context['parameters'].append({'name': f'Model {i}', 'value': model_dict['name'], 'advvalue': model_dict['score_threshold'], })
+    #context['parameters'].append({'name': 'score threshold', 'value': detector.score_threshold, })
     return render_template("settings.html", context=context)
 
 
@@ -75,14 +77,19 @@ def gen(video, ID):
         success, image = video.read()
 
         # perform to detect objects
-        frame = detector.show_frame(image, ID)
-
+        if success:
+            frame = detector.show_frame(image, ID)
+        else:
+            img = cv2.imread(detector.path_images+'notavailable.jpg')
+            ret, jpeg = cv2.imencode('.jpg', img)
+            frame = jpeg.tobytes()
+            video = cv2.VideoCapture(0)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
 @app.route('/video_feed/<int:ID>')
-@app.route('/video_feed', defaults={'ID': 0})  # added line which handles None
+@app.route('/video_feed', defaults={'ID': 0})  # Альтернативый вариант передачи ID модели
 def video_feed(ID: int):
     return Response(gen(video, ID=model_ID),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
