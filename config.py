@@ -5,4 +5,4 @@ class Config(object):
     # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mssql+pymssql://sql_admin:Ap30875@192.168.2.131:1433/web-detector'
     # SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = 'app/static/uploads/'
-    MAX_CONTENT_LENGTH = 3 * 3000 * 1500
+    MAX_CONTENT_LENGTH = 3 * 3000 * 1700

@@ -18,8 +18,8 @@ FPS_index = 0
 
 class Detector(object):
     def __init__(self, model_IDs: list, path_images: str):
-        MODEL_CONFIG_FILES: str = 'app/model_config/'
-        # MODEL_CONFIG_FILES: str = 'model_config/'
+        MODEL_CONFIG_FILES: str = 'app/model_config_1/'
+        # MODEL_CONFIG_FILES: str = 'model_config_1/'
 
         self.model_IDs: list = model_IDs
         if len(self.model_IDs) == 0:
@@ -34,6 +34,7 @@ class Detector(object):
         else:
             self.DEVICE = torch.device('cpu')
         self.device_properties = torch.cuda.get_device_properties(self.DEVICE)
+
 
         self.models: list = []
         if 2 in self.model_IDs:
